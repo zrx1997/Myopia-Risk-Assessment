@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet & Eye Habit Myopia Risk Assessment</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 40%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 16px;
+            color: #333;
+            margin: 20px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8e8e8;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus, select:focus {
+            border-color: #1a73e8;
+            outline: none;
+        }
+        .radio-group {
+            display: flex;
+            gap: 16px;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .radio-group input[type="radio"] {
+            width: 18px;
+            height: 18px;
+        }
+        .bmi-display {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        .bmi-display span {
+            font-weight: 600;
+            color: #1976d2;
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+        .result-section {
+            margin-top: 24px;
+            display: none;
+        }
+        .result-section.active {
+            display: block;
+        }
+        .result-card {
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+        .result-card.low {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c8 100%);
+        }
+        .result-card.medium {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        }
+        .result-card.high {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        }
+        .risk-level {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .result-card.low .risk-level { color: #2e7d32; }
+        .result-card.medium .risk-level { color: #ef6c00; }
+        .result-card.high .risk-level { color: #c62828; }
+        .probability {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .probability-unit {
+            font-size: 20px;
+            color: #666;
+        }
+        .calculation-details {
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .calculation-details h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+        .detail-row .factor {
+            color: #666;
+        }
+        .detail-row .value {
+            font-weight: 500;
+            color: #333;
+        }
+        .linear-predictor {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Diet & Eye Habit Myopia Risk Assessment</h1>
+
+        <!-- Basic Information -->
+        <h2>Basic Information</h2>
+
+        <div class="form-group">
+            <label>Gender</label>
+            <div class="radio-group">
+                <label><input type="radio" name="gender" value="1" checked> Male</label>
+                <label><input type="radio" name="gender" value="0"> Female</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Grade</label>
+            <select id="grade">
+                <option value="1">Grade 1</option>
+                <option value="2">Grade 2</option>
+                <option value="3">Grade 3</option>
+                <option value="4">Grade 4</option>
+                <option value="5">Grade 5</option>
+                <option value="6">Grade 6</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" id="height" placeholder="cm" step="0.1" min="50" max="200">
+        </div>
+
+        <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight" placeholder="kg" step="0.1" min="10" max="150">
+        </div>
+
+        <div class="bmi-display">
+            BMI: <span id="bmiValue">--</span> kg/m² | Model: <span id="modelName">--</span>
+        </div>
+
+        <!-- Family History -->
+        <div class="form-group">
+            <label>Father Myopia</label>
+            <div class="radio-group">
+                <label><input type="radio" name="fatherMyopia" value="0" checked> No</label>
+                <label><input type="radio" name="fatherMyopia" value="1"> Yes</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Mother Myopia</label>
+            <div class="radio-group">
+                <label><input type="radio" name="motherMyopia" value="0" checked> No</label>
+                <label><input type="radio" name="motherMyopia" value="1"> Yes</label>
+            </div>
+        </div>
+
+        <!-- Dietary Habits -->
+        <h2>Dietary Habits</h2>
+
+        <div class="form-group">
+            <label>Sugary Drinks Frequency</label>
+            <div class="radio-group">
+                <label><input type="radio" name="sugaryDrinksFreq" value="0" checked> <3 times/week</label>
+                <label><input type="radio" name="sugaryDrinksFreq" value="1"> ≥3 times/week</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Sweets Frequency</label>
+            <div class="radio-group">
+                <label><input type="radio" name="sweetsFreq" value="0" checked> <3 times/week</label>
+                <label><input type="radio" name="sweetsFreq" value="1"> ≥3 times/week</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Fried Food Frequency</label>
+            <div class="radio-group">
+                <label><input type="radio" name="friedFoodFreq" value="0" checked> <3 times/week</label>
+                <label><input type="radio" name="friedFoodFreq" value="1"> ≥3 times/week</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Fresh Fruits Frequency</label>
+            <div class="radio-group">
+                <label><input type="radio" name="fruitsFreq" value="0" checked> ≥3 times/week</label>
+                <label><input type="radio" name="fruitsFreq" value="1"> <3 times/week</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Fresh Vegetables Frequency</label>
+            <div class="radio-group">
+                <label><input type="radio" name="vegetablesFreq" value="0" checked> ≥3 times/week</label>
+                <label><input type="radio" name="vegetablesFreq" value="1"> <3 times/week</label>
+            </div>
+        </div>
+
+        <!-- Lifestyle Habits -->
+        <h2>Lifestyle Habits</h2>
+
+        <div class="form-group">
+            <label>Daily Sleep Hours</label>
+            <div class="radio-group">
+                <label><input type="radio" name="dailySleepHours" value="0" checked> ≥9 hours</label>
+                <label><input type="radio" name="dailySleepHours" value="1"> <9 hours</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Weekend Outdoor Activity Hours</label>
+            <select id="outdoorHours">
+                <option value="10">>10 hours</option>
+                <option value="8">8 hours</option>
+                <option value="6">6 hours</option>
+                <option value="5">5 hours</option>
+                <option value="3">3 hours</option>
+                <option value="2">2 hours</option>
+                <option value="1"><1 hour</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Reading Posture</label>
+            <div class="radio-group">
+                <label><input type="radio" name="readingDistance" value="0" checked> Correct</label>
+                <label><input type="radio" name="readingDistance" value="1"> Incorrect</label>
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculateRisk()">Calculate Risk</button>
+
+        <!-- Result Display -->
+        <div class="result-section" id="resultSection">
+            <div class="result-card" id="resultCard">
+                <div class="risk-level" id="riskLevelText">--</div>
+                <div class="probability">
+                    <span id="probabilityValue">0.00</span>
+                    <span class="probability-unit">%</span>
+                </div>
+            </div>
+
+            <div class="calculation-details">
+                <h3>Calculation Details</h3>
+                <div id="calculationSteps"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Real-time BMI calculation
+        function updateBMI() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+
+            if (height && weight && height > 0 && weight > 0) {
+                const bmi = weight / ((height / 100) ** 2);
+                document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+                const modelName = bmi <= 20 ? 'BMI ≤ 20' : 'BMI > 20';
+                document.getElementById('modelName').textContent = modelName;
+            } else {
+                document.getElementById('bmiValue').textContent = '--';
+                document.getElementById('modelName').textContent = '--';
+            }
+        }
+
+        document.getElementById('height').addEventListener('input', updateBMI);
+        document.getElementById('weight').addEventListener('input', updateBMI);
+
+        // Get radio button value
+        function getRadioValue(name) {
+            const radios = document.getElementsByName(name);
+            for (let radio of radios) {
+                if (radio.checked) {
+                    return parseInt(radio.value);
+                }
+            }
+            return 0;
+        }
+
+        // Core risk calculation function - exact algorithm reproduction
+        function calculateRiskByNomogram(formData) {
+            const {
+                bmi,
+                gender,
+                grade,
+                fatherMyopia,
+                motherMyopia,
+                outdoorHours,
+                sugaryDrinksFreq,
+                sweetsFreq,
+                friedFoodFreq,
+                fruitsFreq,
+                vegetablesFreq,
+                dailySleepHours,
+                readingDistance
+            } = formData;
+
+            const bmiVal = Number(bmi);
+            const isLowBMI = bmiVal <= 20;
+            const gradeNum = Number(grade);
+            const outdoorHoursNum = Number(outdoorHours);
+
+            let details = [];
+            let linearPredictor = 0;
+
+            // ========== BMI ≤ 20 Model (Left Nomogram) ==========
+            if (isLowBMI) {
+                linearPredictor = -2.5;
+                details.push({ factor: 'Intercept', value: -2.5 });
+
+                if (motherMyopia === 1) {
+                    linearPredictor += 0.6156;
+                    details.push({ factor: 'Mother Myopia', value: '+0.6156' });
+                }
+
+                const gradeContribution = 0.4545 * (gradeNum - 1);
+                linearPredictor += gradeContribution;
+                details.push({ factor: 'Grade', value: `+${gradeContribution.toFixed(4)}` });
+
+                if (gender === 1) {
+                    linearPredictor += 0.3161;
+                    details.push({ factor: 'Gender (Male)', value: '+0.3161' });
+                }
+
+                if (fatherMyopia === 1) {
+                    linearPredictor += 0.2895;
+                    details.push({ factor: 'Father Myopia', value: '+0.2895' });
+                }
+
+                if (sugaryDrinksFreq === 1) {
+                    linearPredictor += 0.2462;
+                    details.push({ factor: 'Sugary Drinks', value: '+0.2462' });
+                }
+
+                if (fruitsFreq === 1) {
+                    linearPredictor += 0.1897;
+                    details.push({ factor: 'Fresh Fruits', value: '+0.1897' });
+                }
+
+                if (friedFoodFreq === 1) {
+                    linearPredictor += 0.1431;
+                    details.push({ factor: 'Fried Food', value: '+0.1431' });
+                }
+
+                if (sweetsFreq === 1) {
+                    linearPredictor += 0.1564;
+                    details.push({ factor: 'Sweets', value: '+0.1564' });
+                }
+
+                const outdoorContribution = -0.02408 * (outdoorHoursNum - 10);
+                linearPredictor += outdoorContribution;
+                details.push({ factor: 'Outdoor Hours', value: outdoorContribution.toFixed(4) });
+
+            }
+            // ========== BMI > 20 Model (Right Nomogram) ==========
+            else {
+                linearPredictor = -2.5;
+                details.push({ factor: 'Intercept', value: -2.5 });
+
+                if (motherMyopia === 1) {
+                    linearPredictor += 0.2228;
+                    details.push({ factor: 'Mother Myopia', value: '+0.2228' });
+                }
+
+                const gradeContribution = 0.3929 * (gradeNum - 1);
+                linearPredictor += gradeContribution;
+                details.push({ factor: 'Grade', value: `+${gradeContribution.toFixed(4)}` });
+
+                if (gender === 1) {
+                    linearPredictor += 0.2112;
+                    details.push({ factor: 'Gender (Male)', value: '+0.2112' });
+                }
+
+                if (fatherMyopia === 1) {
+                    linearPredictor += 0.3124;
+                    details.push({ factor: 'Father Myopia', value: '+0.3124' });
+                }
+
+                if (vegetablesFreq === 1) {
+                    linearPredictor += -0.5207;
+                    details.push({ factor: 'Vegetables', value: '-0.5207' });
+                }
+
+                if (sugaryDrinksFreq === 1) {
+                    linearPredictor += 0.5554;
+                    details.push({ factor: 'Sugary Drinks', value: '+0.5554' });
+                }
+
+                if (dailySleepHours === 1) {
+                    linearPredictor += -0.3327;
+                    details.push({ factor: 'Sleep Hours', value: '-0.3327' });
+                }
+
+                if (readingDistance === 1) {
+                    linearPredictor += 0.3790;
+                    details.push({ factor: 'Reading Posture', value: '+0.3790' });
+                }
+
+                const outdoorContribution = -0.07847 * (outdoorHoursNum - 10);
+                linearPredictor += outdoorContribution;
+                details.push({ factor: 'Outdoor Hours', value: outdoorContribution.toFixed(4) });
+            }
+
+            // Calculate probability: P = 1 / (1 + e^(-LP))
+            const probability = 1 / (1 + Math.exp(-linearPredictor));
+
+            // Risk level determination
+            let riskLevel;
+            if (probability < 0.3) {
+                riskLevel = 'Low Risk';
+            } else if (probability < 0.7) {
+                riskLevel = 'Medium Risk';
+            } else {
+                riskLevel = 'High Risk';
+            }
+
+            return {
+                model: isLowBMI ? 'BMI ≤ 20' : 'BMI > 20',
+                linearPredictor: linearPredictor,
+                probability: probability,
+                riskLevel: riskLevel,
+                details: details
+            };
+        }
+
+        // Main calculation function
+        function calculateRisk() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const grade = parseInt(document.getElementById('grade').value);
+            const outdoorHours = parseInt(document.getElementById('outdoorHours').value);
+
+            if (!height || !weight) {
+                alert('Please enter height and weight');
+                return;
+            }
+
+            const bmi = weight / ((height / 100) ** 2);
+
+            const formData = {
+                bmi: bmi,
+                gender: getRadioValue('gender'),
+                grade: grade,
+                fatherMyopia: getRadioValue('fatherMyopia'),
+                motherMyopia: getRadioValue('motherMyopia'),
+                outdoorHours: outdoorHours,
+                sugaryDrinksFreq: getRadioValue('sugaryDrinksFreq'),
+                sweetsFreq: getRadioValue('sweetsFreq'),
+                friedFoodFreq: getRadioValue('friedFoodFreq'),
+                fruitsFreq: getRadioValue('fruitsFreq'),
+                vegetablesFreq: getRadioValue('vegetablesFreq'),
+                dailySleepHours: getRadioValue('dailySleepHours'),
+                readingDistance: getRadioValue('readingDistance')
+            };
+
+            const result = calculateRiskByNomogram(formData);
+            displayResult(result);
+        }
+
+        // Display result
+        function displayResult(result) {
+            const resultSection = document.getElementById('resultSection');
+            const resultCard = document.getElementById('resultCard');
+            const riskLevelText = document.getElementById('riskLevelText');
+            const probabilityValue = document.getElementById('probabilityValue');
+            const calculationSteps = document.getElementById('calculationSteps');
+
+            resultCard.className = 'result-card ' +
+                (result.probability < 0.3 ? 'low' : result.probability < 0.7 ? 'medium' : 'high');
+
+            riskLevelText.textContent = result.riskLevel;
+            probabilityValue.textContent = (result.probability * 100).toFixed(2);
+
+            let stepsHTML = `<div style="margin-bottom: 8px; font-size: 13px; color: #666;">Model: ${result.model}</div>`;
+
+            result.details.forEach(detail => {
+                stepsHTML += `
+                    <div class="detail-row">
+                        <span class="factor">${detail.factor}</span>
+                        <span class="value">${detail.value}</span>
+                    </div>
+                `;
+            });
+
+            stepsHTML += `
+                <div class="linear-predictor">
+                    <div class="detail-row">
+                        <span class="factor">Linear Predictor (LP)</span>
+                        <span class="value"><strong>${result.linearPredictor.toFixed(4)}</strong></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="factor">Probability</span>
+                        <span class="value"><strong>${(result.probability * 100).toFixed(2)}%</strong></span>
+                    </div>
+                </div>
+            `;
+
+            calculationSteps.innerHTML = stepsHTML;
+            resultSection.classList.add('active');
+        }
+    </script>
+</body>
+</html>
